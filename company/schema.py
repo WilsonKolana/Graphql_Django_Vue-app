@@ -13,6 +13,7 @@ class TitleNode(DjangoObjectType):
         model = Title
         filter_fields = ['title_name']
         interfaces = (graphene.relay.Node,)
+        
 class EmployeeNode(DjangoObjectType):
     class Meta:
         model = Employee
@@ -22,10 +23,30 @@ class EmployeeNode(DjangoObjectType):
               'employee_title__title_name'
                ]
         interfaces = (graphene.relay.Node,)
+
+class CreateTitle(graphene.relay.ClientIDMutation):
+    title = graphene.Field(TitleNode)
+    class Input:
+        title_name = graphene.String()
+    def mutate_and_get_payload(root, info, **input):
+        title = Title(
+            title_name=input.get('title_name')
+        )
+        title.save()
+        return CreateTitle(title=title)
+
+
 class Query(object):
     city = graphene.relay.Node.Field(CityNode)
     all_cities = DjangoFilterConnectionField(CityNode)
+
     title = graphene.relay.Node.Field(TitleNode)
     all_titles = DjangoFilterConnectionField(TitleNode)
+    
     employee = graphene.relay.Node.Field(EmployeeNode)
     all_employees = DjangoFilterConnectionField(EmployeeNode)
+
+class Mutation(graphene.AbstractType):
+    create_title = CreateTitle.Field()
+
+
