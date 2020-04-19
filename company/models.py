@@ -1,13 +1,23 @@
+'''I did not document my code \n
+wow
+
+'''
+
+
 from django.db import models
 
 # Create your models here.
 
-# City where employees live
+
+
 class City(models.Model):
-    city_name = models.CharField(max_length=100)
+    ''' City where employees live '''
+    
+city_name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.city_name
+
 
 # Employee title
 class Title(models.Model):
