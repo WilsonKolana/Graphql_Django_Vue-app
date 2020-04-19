@@ -2,6 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 from .models import City, Title, Employee
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay.node.node import from_global_id #for updating
 
 class CityNode(DjangoObjectType):
     class Meta:
@@ -52,6 +53,34 @@ class CreateEmployee(graphene.relay.ClientIDMutation):
         employee.save()
         return CreateEmployee(employee=employee)
 
+class UpdateEmployee(graphene.relay.ClientIDMutation):
+    employee = graphene.Field(EmployeeNode)
+    class Input:
+        id = graphene.String()
+        employee_name = graphene.String()
+        employee_city = graphene.String()
+        employee_title = graphene.String()
+    def mutate_and_get_payload(root, info, **input):
+        employee = Employee.objects.get(
+            pk=from_global_id(input.get('id'))[1])
+        employee.employee_name = input.get('employee_name')
+        employee.employee_city = City.objects.get(
+            city_name=input.get('employee_city'))
+        employee.employee_title = Title.objects.get(
+            title_name=input.get('employee_title'))
+        employee.save()
+        return UpdateEmployee(employee=employee)
+
+class DeleteEmployee(graphene.relay.ClientIDMutation):
+    employee = graphene.Field(EmployeeNode)
+    class Input:
+        id = graphene.String()
+    def mutate_and_get_payload(root, info, **input):
+        employee = Employee.objects.get(
+            pk=from_global_id(input.get('id'))[1])
+        employee.delete()
+        return DeleteEmployee(employee=employee)
+
 
 class Query(object):
     city = graphene.relay.Node.Field(CityNode)
@@ -64,9 +93,12 @@ class Query(object):
     all_employees = DjangoFilterConnectionField(EmployeeNode)
 
 
-
 class Mutation(graphene.AbstractType):
     create_title = CreateTitle.Field()
     Create_employee = CreateEmployee.Field()
+    update_employee = UpdateEmployee.Field()
+    delete_employee = DeleteEmployee.Field()
+
+
 
 
