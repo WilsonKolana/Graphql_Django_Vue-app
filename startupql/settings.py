@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'company',
     'graphene_django',
+    'corsheaders', #added the cores
 ]
 
 MIDDLEWARE = [
